@@ -46,10 +46,14 @@ void MerkelMain::printMarket()
     for(std::string const p : OrderBook.getKNownProducts())
     {
         std::cout << "products: " << p << std::endl;
-        std::vector<OrderBookEntry> entries = OrderBook.getOrders(OrderBookType::ask, p, currentTime);
-        std::cout << "Asks see: " << entries.size() << std::endl;
-        std::cout << "Max ask: " << OrderBook::getHighPrice(entries) << std::endl;
-        std::cout << "min ask: " << OrderBook::getLowPrice(entries) << std::endl;
+        std::vector<OrderBookEntry> entriesAsks = OrderBook.getOrders(OrderBookType::ask, p, currentTime);
+        std::vector<OrderBookEntry> entriesBids = OrderBook.getOrders(OrderBookType::bid, p, currentTime);
+        std::cout << "Asks seen: " << entriesAsks.size() << std::endl;
+        std::cout << "Bids seen: " << entriesBids.size() << std::endl;
+        std::cout << "Max ask: " << OrderBook::getHighPrice(entriesAsks) << std::endl;
+        std::cout << "min ask: " << OrderBook::getLowPrice(entriesAsks) << std::endl;
+        std::cout << "Max Bid: " << OrderBook::getHighPrice(entriesBids) << std::endl;
+        std::cout << "min Bid: " << OrderBook::getLowPrice(entriesAsks) << std::endl;
     }
     // std::cout << "OrderBook contains : " << orders.size()<< " entries"<< std::endl;
     // unsigned int bids = 0;
@@ -96,7 +100,30 @@ void MerkelMain::enterAsk()
 }
 void MerkelMain::enterBid()
 {
-    std::cout << "Make a bid- enter amount" << std::endl;
+    std::cout << "Make a bid- enter amount: product,price,amount eg: ETH/BTC,200, 0.5" << std::endl;
+     std::string input;
+    std::getline(std::cin, input);
+    std::cout << "You typed: " << input << std::endl;
+    std::vector<std::string> tokens = CSVReader::tokenise(input, ',');
+    if(tokens.size() != 3)
+    {
+        std::cout<< "Bad input! " << input << std::endl;
+    }
+    else{
+        try{
+        OrderBookEntry obe = CSVReader::stringsToOBE(
+            tokens[1],
+            tokens[2],
+            currentTime,
+            tokens[0],
+            OrderBookType::bid
+            
+        );
+        OrderBook.insertOrder(obe);
+        }catch(const std::exception& e){
+            std::cout << "Bad Input: MerkelMain::enterBid" << std::endl;
+        }
+    }
 }
 void MerkelMain::printWallet()
 {
@@ -105,6 +132,12 @@ void MerkelMain::printWallet()
 void MerkelMain::nextTimeFrame()
 {
     std::cout << "Going to next time frame" << std::endl;
+    std::vector<OrderBookEntry> sales = OrderBook.MatchAsksToBids("ETH/BTC", currentTime);
+    std::cout << "Sales: " << sales.size() << std::endl;
+    for (OrderBookEntry& sale : sales)
+    {
+        std::cout << "Sale price: " << sale.price << "Sale amount: " << sale.amount << std::endl;
+    }
     currentTime = OrderBook.getNextTime(currentTime);
 }
 int MerkelMain::getUserOption()
