@@ -88,6 +88,7 @@ void MerkelMain::enterAsk()
             OrderBookType::ask
             
         );
+        OrderBook.insertOrder(obe);
         }catch(const std::exception& e){
             std::cout << "Bad Input: MerkelMain::enterAsk" << std::endl;
         }
