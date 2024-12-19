@@ -22,6 +22,9 @@ class OrderBook
          */
         std::string getNextTime(std::string timestamp);
         void insertOrder(OrderBookEntry& order);
+
+        std::vector<OrderBookEntry> MatchAsksToBids(std::string product, std::string timesamp);
+
         static double getHighPrice
         (std::vector<OrderBookEntry>& orders);
         static double getLowPrice
